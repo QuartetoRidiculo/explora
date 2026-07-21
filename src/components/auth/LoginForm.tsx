@@ -4,7 +4,9 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { FaFacebook } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
-import { loginSchema, type LoginFormData } from "../../schemas/auth.schema";
+import { loginUserSchema, type LoginFormData } from "../../schemas/auth.schema";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
 
 type Props = {
   onSwitch: () => void;
@@ -13,16 +15,37 @@ type Props = {
 export default function LoginForm({ onSwitch }: Props) {
   const [passwordVisible, setPasswordVisible] = useState(false);
 
+  const { login } = useAuth();
+
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    setError,
+    formState: { errors, isSubmitting },
   } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(loginUserSchema),
   });
 
-  const onSubmit = (data: LoginFormData) => {
-    console.log(data);
+  const navigate = useNavigate();
+
+  const onSubmit = async (data: LoginFormData) => {
+    try {
+      await login(data);
+
+      navigate("/");
+    } catch (err) {
+      console.error(err);
+
+      if (err instanceof Error) {
+        setError("root", {
+          message: err.message,
+        });
+      } else {
+        setError("root", {
+          message: "Ocorreu um erro inesperado. Tente novamente.",
+        });
+      }
+    }
   };
 
   return (
@@ -104,10 +127,13 @@ export default function LoginForm({ onSwitch }: Props) {
             {errors.password.message}
           </span>
         )}
+        {errors.root && (
+          <span className="text-sm text-red-500">{errors.root.message}</span>
+        )}
       </div>
 
       <button className="bg-emerald-500 w-full p-4 text-white font-semibold rounded-md hover:bg-emerald-500/90 cursor-pointer">
-        Entrar
+        {isSubmitting ? "Carregando..." : "Entrar"}
       </button>
 
       <p className="text-gray-500 text-center">

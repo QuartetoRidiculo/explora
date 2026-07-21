@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 import {
-  registerSchema,
+  createUserSchema,
   type RegisterFormData,
 } from "../../schemas/auth.schema";
 
@@ -20,13 +20,46 @@ export default function RegisterForm({ onSwitch }: Props) {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    setError,
+    formState: { errors, isSubmitting },
   } = useForm<RegisterFormData>({
-    resolver: zodResolver(registerSchema),
+    resolver: zodResolver(createUserSchema),
   });
 
-  const onSubmit = (data: RegisterFormData) => {
-    console.log(data);
+  const onSubmit = async (data: RegisterFormData) => {
+    try {
+      if (data.password !== data.confirmPassword) {
+        setError("root", {
+          message: "As senhas não coincidem.",
+        });
+        return;
+      }
+
+      const res = await fetch("http://127.0.0.1:8080/user", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!res.ok) {
+        setError("root", {
+          message:
+            "Não foi possível criar sua conta. Verifique os dados e tente novamente.",
+        });
+        return;
+      }
+
+      onSwitch();
+    } catch (err) {
+      console.error(err);
+
+      setError("root", {
+        message:
+          "Não foi possível conectar ao servidor. Tente novamente em instantes.",
+      });
+    }
   };
 
   return (
@@ -50,12 +83,35 @@ export default function RegisterForm({ onSwitch }: Props) {
             type="text"
             placeholder="Seu nome"
             className="shadow w-full pl-12 py-3 pr-3 rounded-md"
-            {...register("name")}
+            {...register("firstName")}
           />
         </div>
 
-        {errors.name && (
-          <span className="text-sm text-red-500">{errors.name.message}</span>
+        {errors.firstName && (
+          <span className="text-sm text-red-500">
+            {errors.firstName.message}
+          </span>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <label className="font-semibold">Sobrenome</label>
+
+        <div className="relative">
+          <User className="absolute top-3 left-3 text-gray-500" />
+
+          <input
+            type="text"
+            placeholder="Seu sobrenome"
+            className="shadow w-full pl-12 py-3 pr-3 rounded-md"
+            {...register("lastName")}
+          />
+        </div>
+
+        {errors.lastName && (
+          <span className="text-sm text-red-500">
+            {errors.lastName.message}
+          </span>
         )}
       </div>
 
@@ -134,10 +190,13 @@ export default function RegisterForm({ onSwitch }: Props) {
             {errors.confirmPassword.message}
           </span>
         )}
+        {errors.root && (
+          <span className="text-sm text-red-500">{errors.root.message}</span>
+        )}
       </div>
 
       <button className="bg-emerald-500 w-full p-4 text-white font-semibold rounded-md hover:bg-emerald-500/90 cursor-pointer">
-        Criar conta
+        {isSubmitting ? "Carregando..." : "Criar conta"}
       </button>
 
       <p className="text-gray-500 text-center">

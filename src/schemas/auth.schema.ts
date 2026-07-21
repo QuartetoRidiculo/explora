@@ -1,19 +1,16 @@
 import { z } from "zod";
 
-export const loginSchema = z.object({
+export const loginUserSchema = z.object({
   email: z.email("Email inválido"),
-  password: z
-    .string()
-    .min(6, "A senha precisa ter pelo menos 6 caracteres"),
+  password: z.string().min(6, "A senha precisa ter pelo menos 6 caracteres"),
 });
 
-export const registerSchema = z
+export const createUserSchema = z
   .object({
-    name: z.string().min(3, "Nome muito curto"),
+    firstName: z.string().min(1, "O nome é obrigatório"),
+    lastName: z.string().min(1, "O sobrenome é obrigatório"),
     email: z.email("Email inválido"),
-    password: z
-      .string()
-      .min(6, "A senha precisa ter pelo menos 6 caracteres"),
+    password: z.string().min(6, "A senha precisa ter pelo menos 6 caracteres"),
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -21,6 +18,6 @@ export const registerSchema = z
     path: ["confirmPassword"],
   });
 
-export type LoginFormData = z.infer<typeof loginSchema>;
+export type LoginFormData = z.infer<typeof loginUserSchema>;
 
-export type RegisterFormData = z.infer<typeof registerSchema>;
+export type RegisterFormData = z.infer<typeof createUserSchema>;

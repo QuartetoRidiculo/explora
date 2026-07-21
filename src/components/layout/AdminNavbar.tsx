@@ -1,10 +1,11 @@
 import { Link, useLocation } from "react-router-dom";
 import { Building2, Compass, MapPin, Store, Tag } from "lucide-react";
+import { useAuth } from "../../contexts/AuthContext";
 
 export const adminLinks = [
   {
     name: "Cidades",
-    path: "cidades",
+    path: "",
     icon: Building2,
   },
   {
@@ -26,6 +27,7 @@ export const adminLinks = [
 
 export default function AdminNavbar() {
   const pathname = useLocation().pathname.split("/")[2];
+  const { logout } = useAuth();
 
   return (
     <header className="px-16 py-4 space-y-8">
@@ -53,6 +55,9 @@ export default function AdminNavbar() {
               </Link>
             </li>
           ))}
+          <li>
+            <button onClick={() => logout()} className="cursor-pointer">Sair</button>
+          </li>
         </ul>
       </nav>
     </header>

@@ -19,6 +19,10 @@ import CitiesInfo from "./pages/cities/CitiesInfo.tsx";
 import AuthPage from "./pages/AuthPage.tsx";
 import Explore from "./pages/explore/Explore.tsx";
 import About from "./pages/About.tsx";
+import { AuthProvider } from "./contexts/AuthContext.tsx";
+import { ProtectedRoute } from "./routes/ProtectedRoute.tsx";
+import { AdminRoute } from "./routes/AdminRoute.tsx";
+import { UserRoute } from "./routes/UserRoute.tsx";
 
 const router = createBrowserRouter([
   {
@@ -26,62 +30,80 @@ const router = createBrowserRouter([
     element: <AuthPage />,
   },
   {
-    path: "/admin",
-    element: <AdminRootLayout />,
+    element: <AdminRoute />,
     children: [
       {
-        path: "/admin/destinos",
-        element: <AdminDestinationsPage />,
-      },
-      {
-        path: "/admin/cidades",
-        element: <AdminCitiesPage />,
-      },
-      {
-        path: "comercios",
-        element: <AdminBusinessPage />,
-      },
-      {
-        path: "categorias",
-        element: <AdminCategoriesPage />,
+        path: "/admin",
+        element: <AdminRootLayout />,
+        children: [
+          {
+            path: "",
+            element: <AdminCitiesPage />,
+          },
+          {
+            path: "destinos",
+            element: <AdminDestinationsPage />,
+          },
+          {
+            path: "comercios",
+            element: <AdminBusinessPage />,
+          },
+          {
+            path: "categorias",
+            element: <AdminCategoriesPage />,
+          },
+        ],
       },
     ],
   },
   {
-    path: "/",
-    element: <RootLayout />,
+    element: <UserRoute />,
     children: [
       {
         path: "/",
-        element: <App />,
-      },
-      {
-        path: "/sobre",
-        element: <About />
-      },
-      {
-        path: "/cidades",
-        element: <Cities />,
-      },
-      {
-        path: "/cidades/:id",
-        element: <CitiesInfo />,
-      },
-      {
-        path: "/perfil",
-        element: <ProfilePage />,
-      },
-      {
-        path: "/favoritos",
-        element: <FavoritesPage />,
-      },
-      {
-        path: "/destinos",
-        element: <Explore />,
-      },
-      {
-        path: "/destino/:id",
-        element: <DestinationDetailPage />,
+        element: <RootLayout />,
+        children: [
+          {
+            index: true,
+            element: <App />,
+          },
+          {
+            path: "sobre",
+            element: <About />,
+          },
+          {
+            path: "cidades",
+            element: <Cities />,
+          },
+          {
+            path: "cidades/:id",
+            element: <CitiesInfo />,
+          },
+          {
+            path: "perfil",
+            element: (
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: "favoritos",
+            element: (
+              <ProtectedRoute>
+                <FavoritesPage />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: "destinos",
+            element: <Explore />,
+          },
+          {
+            path: "destino/:id",
+            element: <DestinationDetailPage />,
+          },
+        ],
       },
     ],
   },
@@ -93,6 +115,8 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
   </StrictMode>,
 );

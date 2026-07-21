@@ -1,8 +1,11 @@
 import { Heart, MapPin, Settings, Star } from "lucide-react";
 import DestinationCard from "../components/DestinationCard";
 import { destinations } from "../lib/mockData";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function ProfilePage() {
+  const {user} = useAuth();
+
   return (
     <>
       <div className="p-6 mt">
@@ -10,7 +13,7 @@ export default function ProfilePage() {
           <div className="flex items-center gap-4">
             <div className=" h-20 w-20 bg-emerald-500 rounded-full"></div>
             <div>
-              <h1 className="text-xl font-bold ">Lucas Andrae</h1>
+              <h1 className="text-xl font-bold ">{user?.firstName + " " + user?.lastName}</h1>
             </div>
           </div>
           <div className="flex shadow-md px-2 rounded-2xl items-center hover:bg-white">
